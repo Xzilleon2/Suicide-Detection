@@ -1,0 +1,8 @@
+streamlit==1.52.1
+numpy
+pandas
+scikit-learn
+imbalanced-learn
+neattext
+tqdm
+gdown
