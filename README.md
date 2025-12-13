@@ -2,7 +2,7 @@
 
 # Project Overview
 
-This project focuses on detecting suicidal and non-suicidal text using supervised machine learning techniques. The system analyzes textual input and predicts whether the content indicates suicidal ideation. The goal of the model is to assist in identifying potentially high-risk text that may require further attention or intervention.
+This project focuses on detecting suicidal risk and non-suicidal risk text using supervised machine learning techniques. The system analyzes textual input and predicts whether the content indicates suicidal ideation. The goal of the model is to assist in identifying potentially high-risk text that may require further attention or intervention.
 
 The application processes user-provided text, applies text preprocessing and feature extraction, and then classifies the text using trained machine learning models. The project is implemented in Python and deployed using a Streamlit web interface for easy interaction.
 
