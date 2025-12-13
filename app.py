@@ -64,8 +64,8 @@ def predict_best_model(text):
     return best_prediction, best_model_name, preds
 
 # Streamlit App
-st.title("Suicidal text Prediction App")
-st.write("Enter text below to predict if it indicates suicide text (suicide/non-suicide). Please use english as language.")
+st.title("Suicidal Risk In Text Prediction App")
+st.write("Enter text below to predict if it indicates suicide risk (suicide/non-suicide). Please use english as language.")
 
 user_input = st.text_area("Input Text:", "")
 
