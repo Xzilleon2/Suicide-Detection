@@ -75,9 +75,9 @@ if st.button("Predict"):
 
         st.subheader("Prediction Result:")
         if prediction == 'suicide':
-            st.error(f"The text indicates **{prediction.upper()}** risk based on **{model_name}**.")
+            st.error(f"The text may indicate **{prediction.upper()}** risk based on **{model_name}**.")
         else:
-            st.success(f"The text indicates **{prediction.upper()}** risk based on **{model_name}**.")
+            st.success(f"The text indicate **{prediction.upper()}** risk based on **{model_name}**.")
 
         st.subheader("Detailed Model Confidences (Weighted by F1 Score):")
         for m, (pred, prob) in all_preds.items():
