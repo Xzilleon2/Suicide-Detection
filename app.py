@@ -1,9 +1,9 @@
+%%writefile app.py
 import streamlit as st
 import pickle as pkl
 import pandas as pd
 import re
 from sklearn.preprocessing import LabelEncoder
-import spacy
 
 # =====================
 # CONFIG
@@ -12,48 +12,37 @@ THRESHOLD = 0.95
 MIN_WORDS = 10  # Minimum words for meaningful prediction
 
 # =====================
-# CACHED MODEL LOADING
+# LOAD MODELS
 # =====================
-@st.cache_resource
-def load_resources():
-    # Load spaCy model
-    nlp_model = spacy.load("en_core_web_sm")
-    # Load TF-IDF vectorizer
-    tfidf_vect = pkl.load(open("tfidf_vectorizer.pkl", "rb"))
-    # Load Naive Bayes model
-    nb_model = pkl.load(open("suicide_nb_model.sav", "rb"))
-    return nlp_model, tfidf_vect, nb_model
+with open("tfidf_vectorizer.pkl", "rb") as file:
+    tfidf = pkl.load(file)
 
-nlp, tfidf, nb_model = load_resources()
+with open("suicide_nb_model.sav", "rb") as file:
+    nb_model = pkl.load(file)
 
 # Label encoder
 encoder = LabelEncoder()
-encoder.fit(['non-suicide', 'suicide'])
+encoder.fit(["non-suicide", "suicide"])
 
 # =====================
-# TEXT CLEANING + POS FILTER
+# TEXT CLEANING
 # =====================
 def clean_text(text_series):
+    """
+    Clean text: lowercase, handle negations, remove non-alphanumeric chars.
+    POS filtering removed for Streamlit Cloud compatibility.
+    """
     cleaned_text = []
     text_series = text_series.fillna("").astype(str)
 
     for sent in text_series:
-        # Lowercase
         sent = sent.lower()
-
-        # Preserve negations
         sent = sent.replace("don't", "do not").replace("dont", "do not")
         sent = sent.replace("can't", "can not").replace("cant", "can not")
         sent = sent.replace("won't", "will not").replace("wont", "will not")
-
-        # Remove non-alphanumeric chars
-        sent = re.sub(r'[^a-z0-9\s]', '', sent)
-        sent = re.sub(r'\s+', ' ', sent).strip()
-
-        # POS filtering: keep VERB, ADJ, ADV, NOUN
-        doc = nlp(sent)
-        tokens = [token.text for token in doc if token.pos_ in ['VERB', 'ADJ', 'ADV', 'NOUN']]
-        cleaned_text.append(" ".join(tokens))
+        sent = re.sub(r"[^a-z0-9\s]", "", sent)
+        sent = re.sub(r"\s+", " ", sent).strip()
+        cleaned_text.append(sent)
 
     return cleaned_text
 
@@ -61,19 +50,16 @@ def clean_text(text_series):
 # PREDICTION FUNCTION
 # =====================
 def predict_suicide(text):
-    # Minimum context check
     if len(text.split()) < MIN_WORDS:
         return None, None
 
     cleaned_input = clean_text(pd.Series([text]))
     vectorized_input = tfidf.transform(cleaned_input)
 
-    # Probability of suicide class (class = 1)
     suicide_proba = nb_model.predict_proba(vectorized_input)[0][
         list(nb_model.classes_).index(1)
     ]
 
-    # Apply threshold
     final_prediction = 1 if suicide_proba >= THRESHOLD else 0
     return final_prediction, suicide_proba
 
@@ -98,7 +84,7 @@ if st.button("Predict"):
             st.warning(f"Please enter a paragraph with at least {MIN_WORDS} words for better prediction.")
         else:
             prediction_label = encoder.inverse_transform([prediction])[0]
-            if prediction_label == 'suicide':
+            if prediction_label == "suicide":
                 st.error(
                     f"**Text contains SUICIDE tendency**\n\n"
                     f"Confidence: {confidence * 100:.2f}%"
