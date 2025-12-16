@@ -2,7 +2,7 @@ import streamlit as st
 import pickle as pkl
 import pandas as pd
 import re
-import numpy as np
+import spacy
 from sklearn.preprocessing import LabelEncoder
 
 # =====================
@@ -23,21 +23,34 @@ with open('suicide_nb_model.sav', 'rb') as file:
 encoder = LabelEncoder()
 encoder.fit(['non-suicide', 'suicide'])
 
+# Load spaCy English model
+nlp = spacy.load("en_core_web_sm")
+
 # =====================
-# TEXT CLEANING
+# TEXT CLEANING + POS FILTER
 # =====================
 def clean_text(text_series):
     cleaned_text = []
     text_series = text_series.fillna("").astype(str)
 
     for sent in text_series:
+        # Lowercase
         sent = sent.lower()
+
+        # Preserve negations
         sent = sent.replace("don't", "do not").replace("dont", "do not")
         sent = sent.replace("can't", "can not").replace("cant", "can not")
         sent = sent.replace("won't", "will not").replace("wont", "will not")
+
+        # Remove non-alphanumeric chars
         sent = re.sub(r'[^a-z0-9\s]', '', sent)
         sent = re.sub(r'\s+', ' ', sent).strip()
-        cleaned_text.append(sent)
+
+        # POS filtering: keep VERB, ADJ, ADV, NOUN
+        doc = nlp(sent)
+        tokens = [token.text for token in doc if token.pos_ in ['VERB', 'ADJ', 'ADV', 'NOUN']]
+
+        cleaned_text.append(" ".join(tokens))
 
     return cleaned_text
 
@@ -57,7 +70,7 @@ def predict_suicide(text):
         list(nb_model.classes_).index(1)
     ]
 
-    # Apply threshold logic
+    # Apply threshold
     if suicide_proba >= THRESHOLD:
         final_prediction = 1  # suicide
     else:
@@ -70,8 +83,8 @@ def predict_suicide(text):
 # =====================
 st.title("Suicidal Risk In Text Prediction App")
 st.write(
-    "Enter a paragraph below to predict if it indicates suicide tendency"
-    "Please use english."
+    "Enter a paragraph below to predict if it indicates suicide tendency. "
+    "Please use English."
 )
 
 user_input = st.text_area("Input Text:", "")
@@ -82,19 +95,19 @@ if st.button("Predict"):
 
         if prediction is None:
             st.warning(
-                "Please enter a sentence or paragraph with at least 10 words for better prediction."
+                "Please enter a paragraph with at least 10 words for better prediction."
             )
         else:
             prediction_label = encoder.inverse_transform([prediction])[0]
 
             if prediction_label == 'suicide':
                 st.error(
-                    f"**text contains SUICIDE tendency**\n\n"
+                    f"**Text contains SUICIDE tendency**\n\n"
                     f"Confidence: {confidence * 100:.2f}%"
                 )
             else:
                 st.success(
-                    f"✅ **text contains NON-SUICIDE tendency**\n\n"
+                    f"✅ **Text contains NON-SUICIDE tendency**\n\n"
                     f"Confidence: {confidence * 100:.2f}%"
                 )
     else:
