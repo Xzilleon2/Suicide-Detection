@@ -26,16 +26,6 @@ encoder = LabelEncoder()
 encoder.fit(['non-suicide', 'suicide'])
 
 # =====================
-# LOAD spaCy MODEL (auto-install if missing)
-# =====================
-try:
-    nlp = spacy.load("en_core_web_sm")
-except OSError:
-    # Install the model
-    subprocess.check_call([sys.executable, "-m", "spacy", "download", "en_core_web_sm"])
-    nlp = spacy.load("en_core_web_sm")
-
-# =====================
 # TEXT CLEANING + POS FILTER
 # =====================
 def clean_text(text_series):
