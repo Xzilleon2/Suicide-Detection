@@ -25,6 +25,9 @@ with open('suicide_nb_model.sav', 'rb') as file:
 encoder = LabelEncoder()
 encoder.fit(['non-suicide', 'suicide'])
 
+import spacy
+nlp = spacy.load("en_core_web_sm")
+
 # =====================
 # TEXT CLEANING + POS FILTER
 # =====================
