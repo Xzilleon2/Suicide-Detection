@@ -3,6 +3,8 @@ import pickle as pkl
 import pandas as pd
 import re
 import spacy
+import subprocess
+import sys
 from sklearn.preprocessing import LabelEncoder
 
 # =====================
@@ -23,8 +25,15 @@ with open('suicide_nb_model.sav', 'rb') as file:
 encoder = LabelEncoder()
 encoder.fit(['non-suicide', 'suicide'])
 
-# Load spaCy English model
-nlp = spacy.load("en_core_web_sm")
+# =====================
+# LOAD spaCy MODEL (auto-install if missing)
+# =====================
+try:
+    nlp = spacy.load("en_core_web_sm")
+except OSError:
+    # Install the model
+    subprocess.check_call([sys.executable, "-m", "spacy", "download", "en_core_web_sm"])
+    nlp = spacy.load("en_core_web_sm")
 
 # =====================
 # TEXT CLEANING + POS FILTER
