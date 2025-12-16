@@ -46,7 +46,7 @@ def clean_text(text_series):
 # =====================
 def predict_suicide(text):
     # Minimum context check
-    if len(text.split()) < 3:
+    if len(text.split()) < 10:
         return None, None
 
     cleaned_input = clean_text(pd.Series([text]))
@@ -70,7 +70,8 @@ def predict_suicide(text):
 # =====================
 st.title("Suicidal Risk In Text Prediction App")
 st.write(
-    "Enter text below to predict if it indicates suicide tendency "
+    "Enter a paragraph below to predict if it indicates suicide tendency"
+    "Please use english."
 )
 
 user_input = st.text_area("Input Text:", "")
@@ -81,7 +82,7 @@ if st.button("Predict"):
 
         if prediction is None:
             st.warning(
-                "Please enter a sentence or paragraph with at least 3 words."
+                "Please enter a sentence or paragraph with at least 10 words for better prediction."
             )
         else:
             prediction_label = encoder.inverse_transform([prediction])[0]
