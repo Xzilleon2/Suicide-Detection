@@ -7,7 +7,7 @@ from sklearn.preprocessing import LabelEncoder
 # =====================
 # CONFIG
 # =====================
-THRESHOLD = 0.95
+THRESHOLD = 0.90
 MIN_WORDS = 10  # Minimum words for meaningful prediction
 
 # =====================
